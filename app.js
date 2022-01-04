@@ -1,5 +1,5 @@
-const geoCode = require("./geoCode");
-const forecast = require("./forecast");
+const geoCode = require("./utilities/geoCode");
+const forecast = require("./utilities/forecast");
 
 const axios = require("axios");
 
@@ -44,6 +44,9 @@ app.use(
   })
 );
 
+/*On utilise le middleware JSON*/ 
+app.use(express.json())
+
 //On demande au middleware express de
 //chercher les document statiques (images,
 //pages CSS) dans le dossier "public"
@@ -59,8 +62,8 @@ app.post("/temperature", async (req, res) => {
   try {
     //la valeur de ville  va chercher dans la
     //requête dans le DOM <body> puis l'élément
-    // de name "City"
-    const ville = req.body.City;
+    // de name "city"
+    const ville = req.body.city;
     console.log(ville);
 
     const geoloc = await geoCode(ville);
@@ -99,16 +102,16 @@ app.post("/suggestion", async (req, res) => {
   const API_KEY = process.env.API_AUTOCOMPLETE;
 
   //Si le contenu qu'on envoie n'est pas vide
-  if (req.body.City != "") {
-    /*On fait la recherche*/ 
+  if (req.body.city != "") {
+    /*On fait la recherche*/
     const { data } = await axios(
-      `https://api.mapbox.com/geocoding/v5/mapbox.places/${req.body.City}.json?access_token=${API_KEY}&limit=5`
+      `https://api.mapbox.com/geocoding/v5/mapbox.places/${req.body.city}.json?access_token=${API_KEY}&limit=5`
     );
 
     /*result est un objet
     
     map() renvoie un tableau différent de l'original (place est l'argument de map)
-    Chaque élément de map() est modifié pour recevoit place.place_name */ 
+    Chaque élément de map() est modifié pour recevoit place.place_name */
     const result = {
       result: data.features.map((place) => {
         return place.place_name;

@@ -25,8 +25,7 @@ We will be installing dependencies using `npm`, the official NodeJS package mana
 Copy, paste and run the following line in your terminal session to install all necessary packages.
 
 ```bash
-npm i axios
-npm i dotenv
+npm i
 ```
 
 ### 3. Running
