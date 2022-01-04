@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+    <link rel="stylesheet" href="/style/style.css" />
+  </head>
+
+  <!--Le CSS doit être rangé dans public car on autorise son accès
+    (c'est un élément statique à mettre dans ce genre de dossier)-->
+
+  <body>
+    <!--On importe avec EJS le header stocké dans partials-->
+
+    <%- include('partials/header') %>
+
+    <!--Le dossier Views permet de stocker les fichier .ejs-->
+    <main>
+      <h1>Calculator 2022</h1>
+
+      <form method="post" action="/temperature" autocomplete="off">
+        <br />
+        <input
+          id="bar"
+          type="text"
+          name="City"
+          placeholder="Ecrivez le nom d'une ville"
+        />
+        <div>
+          <ol id="suggestion" class="gradient-list">
+            <!--Cette liste sera remplie par les propositions d'autocomplétion-->
+          </ol>
+        </div>
+        <input type="submit" value="Rechercher" />
+      </form>
+    </main>
+
+    <script>
+      const r = (value) => {
+        /*On crée un objet XML (structure de données)
+            (le XML n'est pas très recommendée car on peut récupérer
+            n'importe quelles données)*/
+        const request = new XMLHttpRequest();
+
+        /*On l'informe qu'on utilise la méthode POST, quelle route on
+      utilise, et le booléen informe si c'est asynchrone ou non*/
+        request.open("POST", "/suggestion", true);
+
+        /*On l'informe le système de clés et de valeurs
+      (voir City = Dinard)*/
+        request.setRequestHeader(
+          "content-type",
+          "application/x-www-form-urlencoded"
+        );
+
+        /*On envoie la requête avec City = value*/
+        request.send(`City=${value}`);
+
+        /*onreadystatechange est un évènement :
+      l'état de la requête passe à "ready"
+      (il faut utiliser le mot-clé function
+      pour le "this"*/
+        request.onreadystatechange = function () {
+          /*Si ma requête est DONE et le statut est 200 (accepté)*/
+          if (this.readyState === XMLHttpRequest.DONE && this.status === 200) {
+            /*On affiche le résultat*/
+
+            const response = JSON.parse(request.responseText);
+            console.log(response.result);
+
+            /*On ajoute les suggessions d'autocomplétion*/
+            const ol = document.getElementById("suggestion");
+            ol.innerHTML = ``;
+            response.result.forEach((ville) => {
+              ol.innerHTML += `
+                <li>${ville}</li>
+                `;
+            });
+
+            /*Si on clique sur une suggestion, la valeur de la barre du formulaire devient
+            la valeur choisie*/
+            const lis = document.querySelectorAll("li");
+            lis.forEach((li) => {
+              li.addEventListener("click", (e) => {
+                document.getElementById("bar").value = e.target.textContent;
+              });
+            });
+          }
+        };
+      };
+
+      /*On détecte les évènements*/
+
+      const bar = document.getElementById("bar");
+
+      bar.addEventListener("blur", () => {
+        r(document.getElementById("bar").value);
+      });
+      bar.addEventListener("change", () => {
+        r(document.getElementById("bar").value);
+      });
+      bar.addEventListener("focus", () => {
+        r(document.getElementById("bar").value);
+      });
+      bar.addEventListener("keyup", () => {
+        r(document.getElementById("bar").value);
+        if (document.getElementById("bar").value === "") {
+          document.getElementById("suggestion").innerHTML = "";
+        }
+      });
+      bar.addEventListener("paste", () => {
+        r(document.getElementById("bar").value);
+      });
+    </script>
+  </body>
+</html>
